@@ -2,16 +2,16 @@ package matrix;
 
 import static java.lang.Math.abs;
 
-public class Matrix {
+public record Matrix(double[][] coefficients) {
 
-    public static MatrixElementIndex findMaxAbsElementIndex(double[][] matrix) {
+    public MatrixElementIndex findMaxAbsElementIndex() {
         double max = 0;
         int p = -1;
         int k = -1;
-        for (int i = 0; i < matrix.length; i++) {
-            int j = findMaxAbsRowElementIndex(matrix[i]);
+        for (int i = 0; i < coefficients.length; i++) {
+            int j = findMaxAbsRowElementIndex(coefficients[i]);
             if (j != -1) {
-                double result = matrix[i][j];
+                double result = coefficients[i][j];
                 if (abs(result) > abs(max)) {
                     max = result;
                     p = i;
@@ -22,7 +22,7 @@ public class Matrix {
         return new MatrixElementIndex(p, k);
     }
 
-    private static int findMaxAbsRowElementIndex(double[] row) {
+    private int findMaxAbsRowElementIndex(double[] row) {
         double max = 1e-18;
         int k = -1;
         for (int j = 0; j < row.length - 1; j++) {
@@ -34,8 +34,8 @@ public class Matrix {
         return k;
     }
 
-    public static void print(double[][] matrix) {
-        for (double[] row : matrix) {
+    public void print() {
+        for (double[] row : coefficients) {
             for (double elem : row) {
                 System.out.printf("%6.2f  ", elem);
             }
@@ -44,10 +44,10 @@ public class Matrix {
         System.out.println();
     }
 
-    public static double[][] copy(double[][] src) {
-        double[][] dst = new double[src.length][];
-        for (int i = 0; i < src.length; i++) {
-            dst[i] = src[i].clone();
+    public double[][] copy() {
+        double[][] dst = new double[coefficients.length][];
+        for (int i = 0; i < coefficients.length; i++) {
+            dst[i] = coefficients[i].clone();
         }
         return dst;
     }

@@ -10,55 +10,56 @@ import java.util.List;
 
 public class GaussianElimination {
 
-    public double[] computeAnswer(double[][] matrix) {
+    public double[] computeAnswer(Matrix matrix) {
         TriangularMatrix transformedMatrix = bringToTriangularShape(matrix);
         if (transformedMatrix != null) {
             System.out.printf("Determinant = %.2f \n\n", transformedMatrix.calculateDeterminant());
-            Matrix.print(transformedMatrix.getRealTriangularMatrix());
+            transformedMatrix.getRealTriangularMatrix().print();
             return doReverse(transformedMatrix);
         } else {
             return null;
         }
     }
 
-    public double[] computeDiscrepancies (double[][] matrix, double[] answer) {
-        double[] discrepancies = new double[answer.length];
-        int freeTermIndex = matrix[0].length - 1;
+    public double[] computeResidualError (Matrix matrix, double[] answer) {
+        double[][] coefficients = matrix.coefficients();
+        double[] residualError = new double[coefficients.length];
+        int freeTermIndex = coefficients[0].length - 1;
 
-        for (int i = 0; i < discrepancies.length; i++) {
+        for (int i = 0; i < residualError.length; i++) {
             double calculatedFreeTerm = 0;
             for (int j = 0; j < freeTermIndex; j++) {
-                calculatedFreeTerm += matrix[i][j] * answer[j];
+                calculatedFreeTerm += coefficients[i][j] * answer[j];
             }
-            discrepancies[i] = matrix[i][freeTermIndex] - calculatedFreeTerm;
+            residualError[i] = coefficients[i][freeTermIndex] - calculatedFreeTerm;
         }
-        return discrepancies;
+        return residualError;
     }
 
-    private TriangularMatrix bringToTriangularShape (double[][] matrix) {
-        List<Integer> mainRowsIndexes = new LinkedList<>();
-        List<Integer> mainColumnsIndexes = new LinkedList<>();
+    private TriangularMatrix bringToTriangularShape(Matrix matrix) {
+        LinkedList<Integer> mainRowsIndexes = new LinkedList<>();
+        LinkedList<Integer> mainColumnsIndexes = new LinkedList<>();
 
         while (true) {
-            double[][] curMatrix = Matrix.copy(matrix);
+            Matrix curMatrix = new Matrix(matrix.copy());
             for (Integer mainRowIndex: mainRowsIndexes) {
-                Arrays.fill(curMatrix[mainRowIndex], 0);
+                Arrays.fill(curMatrix.coefficients()[mainRowIndex], 0);
             }
 
-            MatrixElementIndex index = Matrix.findMaxAbsElementIndex(curMatrix);
+            MatrixElementIndex index = curMatrix.findMaxAbsElementIndex();
             int p = index.i();
             int k = index.j();
             if (p != -1 && k != -1) {
                 mainRowsIndexes.add(p);
                 mainColumnsIndexes.add(k);
-                double maxElem = matrix[p][k];
+                double maxElem = matrix.coefficients()[p][k];
 
-                for (int i = 0; i < matrix.length; i++) {
+                for (int i = 0; i < matrix.coefficients().length; i++) {
                     if (i != p) {
                         if (!mainRowsIndexes.contains(i)) {
-                            double q = - matrix[i][k] / maxElem;
-                            for (int j = 0; j < matrix[i].length; j++) {
-                                matrix[i][j] = matrix[i][j] + q * matrix[p][j];
+                            double q = - matrix.coefficients()[i][k] / maxElem;
+                            for (int j = 0; j < matrix.coefficients()[i].length; j++) {
+                                matrix.coefficients()[i][j] += q * matrix.coefficients()[p][j];
                             }
                         }
                     }
@@ -67,7 +68,7 @@ public class GaussianElimination {
                 break;
             }
         }
-        if (mainRowsIndexes.size() < matrix.length) {
+        if (mainRowsIndexes.size() < matrix.coefficients().length) {
             return null;
         }
         return new TriangularMatrix(mainRowsIndexes, mainColumnsIndexes, matrix);
@@ -75,14 +76,14 @@ public class GaussianElimination {
 
     private double[] doReverse(TriangularMatrix triangularMatrix) {
 
-        double[][] matrix = triangularMatrix.matrix();
+        Matrix matrix = triangularMatrix.matrix();
         List<Integer> mainRowsIndexes = triangularMatrix.mainRowsIndexes();
         List<Integer> mainColumnsIndexes = triangularMatrix.mainColumnsIndexes();
 
         Collections.reverse(mainRowsIndexes);
         Collections.reverse(mainColumnsIndexes);
 
-        int n = matrix[0].length - 1;
+        int n = matrix.coefficients()[0].length - 1;
         double[] answer = new double[n];
 
         for (int i = 0; i < n; i++) {
@@ -92,10 +93,10 @@ public class GaussianElimination {
 
             for (int j = 0; j < n; j++) {
                 if (j != x_index && !mainColumnsIndexes.subList(i + 1, mainColumnsIndexes.size()).contains(j)) {
-                    sum += matrix[m][j] * answer[j];
+                    sum += matrix.coefficients()[m][j] * answer[j];
                 }
             }
-            answer[x_index] = (matrix[m][n] - sum) / matrix[m][x_index];
+            answer[x_index] = (matrix.coefficients()[m][n] - sum) / matrix.coefficients()[m][x_index];
         }
         return answer;
     }

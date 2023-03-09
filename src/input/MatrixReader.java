@@ -1,5 +1,7 @@
 package input;
 
+import matrix.Matrix;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -16,7 +18,7 @@ public class MatrixReader {
         this.errorScanner = new Scanner(System.in);
     }
 
-    public double[][] read() {
+    public Matrix read() {
         int rowsNum = readRowsNum();
         int columnsNum = readColumnsNum();
 
@@ -29,7 +31,7 @@ public class MatrixReader {
                 return null;
             }
         }
-        return inputMatrix;
+        return new Matrix(inputMatrix);
     }
 
     private double[] readRow(int columnsNum, int rowNum) {

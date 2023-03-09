@@ -1,41 +1,40 @@
 package gaussmethod;
 
-import java.util.List;
+import matrix.Matrix;
 
-public record TriangularMatrix(List<Integer> mainRowsIndexes,
-                               List<Integer> mainColumnsIndexes,
-                               double[][] matrix) {
+import java.util.LinkedList;
+
+public record TriangularMatrix(LinkedList<Integer> mainRowsIndexes,
+                               LinkedList<Integer> mainColumnsIndexes,
+                               Matrix matrix) {
 
     public double calculateDeterminant() {
         double determinant = 1;
-        for (int k = 0; k < matrix.length; k++) {
+        for (int k = 0; k < matrix.coefficients().length; k++) {
             int i = mainRowsIndexes.get(k);
             int j = mainColumnsIndexes.get(k);
-            determinant *= matrix[i][j];
+            determinant *= matrix.coefficients()[i][j];
         }
         return determinant;
     }
 
-    public double[][] getRealTriangularMatrix() {
-        double[][] realTriangleMatrix = new double[matrix.length][matrix[0].length];
+    public Matrix getRealTriangularMatrix() {
+        int m = matrix.coefficients().length;
+        int n = matrix.coefficients()[0].length;
+        double[][] realTriangleMatrix = new double[m][n];
 
-        for (int i = 0; i < matrix.length; i++) {
+        for (int i = 0; i < m; i++) {
             int mainElemRowIndex = mainRowsIndexes.get(i);
-            int mainElemColumnIndex = mainColumnsIndexes.get(i);
 
-            for (int j = 0; j < matrix[i].length; j++) {
-                if (j == i) {
-                    realTriangleMatrix[i][j] = matrix[mainElemRowIndex][mainElemColumnIndex];
+            for (int j = 0; j < n; j++) {
+                if (j == n - 1) {
+                    realTriangleMatrix[i][j] = matrix.coefficients()[mainElemRowIndex][j];
                     continue;
                 }
-                if (j == matrix[i].length - 1) {
-                    realTriangleMatrix[i][j] = matrix[mainElemRowIndex][matrix[i].length - 1];
-                    continue;
-                }
-                int ind = mainColumnsIndexes.get(j);
-                realTriangleMatrix[i][j] = matrix[mainElemRowIndex][ind];
+                int index = mainColumnsIndexes.get(j);
+                realTriangleMatrix[i][j] = matrix.coefficients()[mainElemRowIndex][index];
             }
         }
-        return realTriangleMatrix;
+        return new Matrix(realTriangleMatrix);
     }
 }

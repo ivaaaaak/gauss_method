@@ -1,6 +1,7 @@
 import gaussmethod.GaussianElimination;
 import input.MatrixGenerator;
 import input.MatrixReader;
+import matrix.Matrix;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,11 +17,11 @@ public class Main {
 
     public static void main(String[] args) {
         int mode = 0;
-        while (mode != 1 && mode != 2 && mode !=3) {
+        while (mode != 1 && mode != 2 && mode != 3) {
             try {
                 System.out.println("Please enter:");
-                System.out.println("1 to read from console");
-                System.out.println("2 to read from file");
+                System.out.println("1 to read matrix from console");
+                System.out.println("2 to read matrix from file");
                 System.out.println("3 to generate matrix");
                 mode = Integer.parseInt(scanner.nextLine());
             } catch (NumberFormatException ignored) {}
@@ -28,28 +29,30 @@ public class Main {
 
         MatrixReader reader = getReader(mode);
         if (reader != null) {
-            double[][] arr;
+            Matrix matrix;
+
             if (mode == 3) {
                 MatrixGenerator generator = new MatrixGenerator();
-                arr = generator.generate(reader.readRowsNum(), reader.readColumnsNum());
+                matrix = generator.generate(reader.readRowsNum(), reader.readColumnsNum());
             } else {
-                arr = reader.read();
+                matrix = reader.read();
             }
-            if (arr != null) {
+
+            if (matrix != null) {
                 System.setOut(consoleOutStream);
 
                 GaussianElimination g = new GaussianElimination();
-                double[] answer = g.computeAnswer(arr);
+                double[] answer = g.computeAnswer(matrix);
 
                 if (answer != null) {
-                    double[] discrepancies = g.computeDiscrepancies(arr, answer);
+                    double[] residualError = g.computeResidualError(matrix, answer);
 
                     for (int i = 0; i < answer.length; i++) {
                         System.out.printf("X" + (i + 1) + " = %.2f \n", answer[i]);
                     }
                     System.out.println();
-                    for (int i = 0; i < discrepancies.length; i++) {
-                        System.out.println("Discrepancies " + (i + 1) + " = " + discrepancies[i]);
+                    for (int i = 0; i < residualError.length; i++) {
+                        System.out.println("Discrepancies " + (i + 1) + " = " + residualError[i]);
                     }
                 } else {
                     System.out.println("The system has no single solution");
